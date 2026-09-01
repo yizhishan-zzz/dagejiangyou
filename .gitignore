@@ -1,0 +1,44 @@
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+
+# Logs and runtime state
+*.log
+*.pid
+*.tmp
+hs_err_pid*
+
+# Generated test and browser output
+.playwright-cli/
+output/
+artifacts/
+coverage/
+
+# Build outputs and caches
+**/build/
+**/.gradle/
+**/.dart_tool/
+**/.pub-cache/
+**/out/
+
+# Generated application packages (publish these as release assets instead)
+apk/
+*.apk
+*.aab
+
+# Office temporary files
+~$*
