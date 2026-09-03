@@ -357,3 +357,13 @@ begin
         );
     end if;
 end $$;
+
+create table if not exists visit_logs (
+    id uuid primary key,
+    user_id uuid,
+    created_at timestamp with time zone not null default now(),
+    updated_at timestamp with time zone not null default now(),
+    constraint fk_visit_log_user foreign key (user_id) references users(id)
+);
+
+create index if not exists idx_visit_logs_created on visit_logs(created_at);

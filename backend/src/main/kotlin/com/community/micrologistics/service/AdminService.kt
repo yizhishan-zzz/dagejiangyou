@@ -9,25 +9,33 @@ import com.community.micrologistics.exception.InvalidOperationException
 import com.community.micrologistics.exception.ResourceNotFoundException
 import com.community.micrologistics.repository.TaskRepository
 import com.community.micrologistics.repository.UserRepository
+import com.community.micrologistics.repository.VisitLogRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.OffsetDateTime
 import java.util.UUID
 
 @Service
 class AdminService(
     private val userRepository: UserRepository,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val visitLogRepository: VisitLogRepository
 ) {
     @Transactional(readOnly = true)
-    fun overview(): AdminOverviewResponse = AdminOverviewResponse(
-        totalUsers = userRepository.count(),
-        activeUsers = userRepository.countByAccountStatus(AccountStatus.ACTIVE),
-        suspendedUsers = userRepository.countByAccountStatus(AccountStatus.SUSPENDED),
-        openTasks = taskRepository.countByStatus(TaskStatus.OPEN),
-        inProgressTasks = listOf(TaskStatus.ACCEPTED, TaskStatus.PICKED_UP, TaskStatus.ARRIVED)
-            .sumOf(taskRepository::countByStatus),
-        completedTasks = taskRepository.countByStatus(TaskStatus.COMPLETED)
-    )
+    fun overview(): AdminOverviewResponse {
+        val startOfToday = OffsetDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0)
+        return AdminOverviewResponse(
+            totalUsers = userRepository.count(),
+            activeUsers = userRepository.countByAccountStatus(AccountStatus.ACTIVE),
+            suspendedUsers = userRepository.countByAccountStatus(AccountStatus.SUSPENDED),
+            openTasks = taskRepository.countByStatus(TaskStatus.OPEN),
+            inProgressTasks = listOf(TaskStatus.ACCEPTED, TaskStatus.PICKED_UP, TaskStatus.ARRIVED)
+                .sumOf(taskRepository::countByStatus),
+            completedTasks = taskRepository.countByStatus(TaskStatus.COMPLETED),
+            totalVisits = visitLogRepository.count(),
+            todayVisits = visitLogRepository.countByCreatedAtGreaterThanEqual(startOfToday)
+        )
+    }
 
     @Transactional(readOnly = true)
     fun listUsers(): List<AdminUserResponse> = userRepository.findTop100ByOrderByCreatedAtDesc().map { user ->

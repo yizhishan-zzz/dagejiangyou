@@ -10,6 +10,7 @@ import com.community.micrologistics.dto.auth.SendOtpResponse
 import com.community.micrologistics.entity.OtpCodeEntity
 import com.community.micrologistics.entity.RefreshTokenEntity
 import com.community.micrologistics.entity.UserEntity
+import com.community.micrologistics.entity.VisitLogEntity
 import com.community.micrologistics.enums.AccountStatus
 import com.community.micrologistics.enums.OtpPurpose
 import com.community.micrologistics.enums.UserMode
@@ -18,6 +19,7 @@ import com.community.micrologistics.exception.InvalidOperationException
 import com.community.micrologistics.repository.OtpCodeRepository
 import com.community.micrologistics.repository.RefreshTokenRepository
 import com.community.micrologistics.repository.UserRepository
+import com.community.micrologistics.repository.VisitLogRepository
 import com.community.micrologistics.security.JwtService
 import com.community.micrologistics.util.CommunityIdentity
 import org.springframework.beans.factory.annotation.Value
@@ -40,6 +42,7 @@ class AuthService(
     private val walletService: WalletService,
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService,
+    private val visitLogRepository: VisitLogRepository,
     @Value("\${app.auth.refresh-token-days:30}") private val refreshTokenDays: Long,
     @Value("\${app.auth.otp.expose-code:false}") private val exposeOtpCode: Boolean
 ) {
@@ -109,6 +112,7 @@ class AuthService(
         val user = userRepository.findByPhoneNumber(phone)
             ?: throw AuthenticationException("该手机号尚未注册，请先创建账号")
         ensureActive(user)
+        recordVisit(user.id)
         return issueSession(user)
     }
 
@@ -121,6 +125,7 @@ class AuthService(
         if (user.passwordHash.isNullOrBlank() || !passwordEncoder.matches(request.password, user.passwordHash)) {
             throw AuthenticationException("手机号或密码错误")
         }
+        recordVisit(user.id)
         return issueSession(user)
     }
 
@@ -167,6 +172,10 @@ class AuthService(
 
         otpRecord.consumedAt = OffsetDateTime.now()
         return otpCodeRepository.save(otpRecord)
+    }
+
+    private fun recordVisit(userId: UUID) {
+        visitLogRepository.save(VisitLogEntity(userId = userId))
     }
 
     private fun issueSession(user: UserEntity): AuthSessionResponse {

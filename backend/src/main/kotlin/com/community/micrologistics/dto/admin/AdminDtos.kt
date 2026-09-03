@@ -15,7 +15,9 @@ data class AdminOverviewResponse(
     val suspendedUsers: Long,
     val openTasks: Long,
     val inProgressTasks: Long,
-    val completedTasks: Long
+    val completedTasks: Long,
+    val totalVisits: Long,
+    val todayVisits: Long
 )
 
 data class AdminUserResponse(
