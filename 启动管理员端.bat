@@ -7,14 +7,20 @@ echo   Dajiangyou - Admin Console Launcher
 echo ============================================
 echo.
 
-rem --- 1. Start backend ---
+rem ======== PostgreSQL connection (EDIT these if needed) ========
+if "%DATABASE_URL%"=="" set "DATABASE_URL=jdbc:postgresql://localhost:5432/community_micro_logistics"
+if "%DATABASE_USERNAME%"=="" set "DATABASE_USERNAME=postgres"
+if "%DATABASE_PASSWORD%"=="" set "DATABASE_PASSWORD=postgres"
+rem ===============================================================
+
+rem --- 1. Start backend (PostgreSQL) ---
 if not exist "backend\gradlew.bat" (
     echo [ERROR] backend\gradlew.bat not found.
     pause
     exit /b 1
 )
-start "Dajiangyou-Backend" /D "%~dp0backend" cmd /k "gradlew.bat bootRun --args=--spring.profiles.active=dev"
-echo [1/3] Backend starting  (Spring Boot / H2)...
+start "Dajiangyou-Backend" /D "%~dp0backend" cmd /k "gradlew.bat bootRun"
+echo [1/3] Backend starting  (PostgreSQL)...
 
 rem --- 2. Start admin static server ---
 start "Dajiangyou-Admin" /D "%~dp0" cmd /k "python -m http.server 4100 --bind 127.0.0.1"

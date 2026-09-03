@@ -270,7 +270,7 @@ create table if not exists reviews (
     task_id uuid not null,
     from_user_id uuid not null,
     to_user_id uuid not null,
-    rating smallint not null,
+    rating integer not null,
     comment varchar(500),
     created_at timestamp with time zone not null default now(),
     updated_at timestamp with time zone not null default now(),
